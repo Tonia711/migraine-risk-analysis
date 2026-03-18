@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 
@@ -72,5 +73,36 @@ def run_spark_pipeline(
     spark.stop()
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the Spark-based migraine risk pipeline.")
+    parser.add_argument(
+        "--input",
+        default="Data/processed/final_modeling_table.csv",
+        help="Path to the modeling table CSV or Parquet file.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="outputs/spark",
+        help="Directory for Spark pipeline outputs.",
+    )
+    parser.add_argument(
+        "--target-col",
+        default="AMIGR",
+        help="Target column name.",
+    )
+    parser.add_argument(
+        "--id-col",
+        default="RID",
+        help="Identifier column name to exclude from features.",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    run_spark_pipeline(input_path="prep_outputs/final_modeling_table.csv")
+    args = parse_args()
+    run_spark_pipeline(
+        input_path=args.input,
+        output_dir=args.output_dir,
+        target_col=args.target_col,
+        id_col=args.id_col,
+    )

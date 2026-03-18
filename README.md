@@ -76,7 +76,7 @@ Implemented multiple models to balance interpretability and performance:
 
 ---
 
-## � Technical Skills Demonstrated
+## Technical Skills Demonstrated
 
 | Category                       | Technologies                           | Application                                                     |
 | ------------------------------ | -------------------------------------- | --------------------------------------------------------------- |
@@ -91,12 +91,24 @@ Implemented multiple models to balance interpretability and performance:
 
 ## 🚀 How to Run
 
+### Python Environment
+
+Use the project-local `.venv` for this repository. Do not mix it with `conda base`, or package availability may differ between interpreters.
+
+```bash
+# Create the virtual environment once
+python3 -m venv .venv
+
+# Activate it
+source .venv/bin/activate
+
+# Install project dependencies
+python -m pip install -r requirements.txt
+```
+
 ### Quick Start (Jupyter Notebook)
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
 # Run the complete analysis
 jupyter notebook notebooks/analysis.ipynb
 ```
@@ -113,7 +125,7 @@ jupyter notebook notebooks/analysis.ipynb
 python src/pipeline.py
 
 # Or run Spark implementation for distributed processing
-python spark/spark_pipeline.py
+python spark/spark_pipeline.py --input Data/processed/final_modeling_table.csv
 ```
 
 ---
