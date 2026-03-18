@@ -8,7 +8,7 @@ A production-grade **end-to-end data analytics pipeline** that identifies key ri
 
 ---
 
-## � Key Achievements
+## Key Achievements
 
 - **Predictive Accuracy:** Built 3 machine learning models (Logistic Regression, Decision Tree, Random Forest) with best-in-class AUC of **0.81**
 - **Production Code:** Modular, maintainable Python architecture with clean separation of concerns (data → features → models → evaluation)
@@ -34,6 +34,9 @@ A production-grade **end-to-end data analytics pipeline** that identifies key ri
 - **Type:** Cross-sectional health survey data
 
 > ⚠️ Note: Raw dataset is not included in this repository due to size and licensing constraints.
+> For public demos, we provide a deterministic modeling-table sample: `Data/sample/final_modeling_table_sample.csv`.
+> You can run training and evaluation with `python src/cli.py --data-mode sample --stage all`.
+> If you have the raw NHIS CSV, use `--data-mode full` to run the complete pipeline.
 
 ---
 
@@ -67,12 +70,9 @@ Implemented multiple models to balance interpretability and performance:
 - Random Forest (ensemble model for robustness)
 
 ### 5. Evaluation
-
 - Metrics: AUC, Accuracy, Precision, Recall, F1-score
-- Best performance:
-  - **AUC ≈ 0.80**
-
-- Used stratified train-test split and cross-validation
+- Threshold tuning: The decision threshold is selected on the validation set (val) using the PR curve to maximize F1.
+  Final metrics are computed on the held-out test set (test) to avoid test-set leakage.
 
 ---
 
@@ -121,8 +121,11 @@ jupyter notebook notebooks/analysis.ipynb
 ### Run Individual Pipeline Stages
 
 ```bash
-# Run full pipeline from raw data
-python src/pipeline.py
+# Public demo (no raw data required)
+python src/cli.py --data-mode sample --stage all --output-dir outputs
+
+# Full pipeline (requires your NHIS CSV under Data/raw/)
+python src/cli.py --data-mode full --stage all --input-raw Data/raw/samadult.csv --output-dir outputs
 
 # Or run Spark implementation for distributed processing
 python spark/spark_pipeline.py --input Data/processed/final_modeling_table.csv
@@ -145,7 +148,8 @@ migraine-risk-analysis/
 │   ├── models/
 │   │   ├── modeling.py            # 3 model training pipelines
 │   │   └── evaluation.py          # Metrics & visualizations
-│   └── pipeline.py                # Orchestration layer
+│   ├── pipeline.py                # Orchestration layer
+│   └── cli.py                      # One-line runner for public demo
 │
 ├── spark/
 │   └── spark_pipeline.py          # Distributed Spark ML implementation
@@ -153,6 +157,7 @@ migraine-risk-analysis/
 ├── Data/
 │   ├── raw/                       # Original NHIS data
 │   └── processed/                 # Cleaned & engineered datasets
+│   └── sample/                    # Fixed-size sample for public demo
 │
 ├── outputs/
 │   ├── dm_metrics_summary.csv     # Model comparison metrics
@@ -160,34 +165,6 @@ migraine-risk-analysis/
 │
 └── README.md
 ```
-
----
-
-## 📌 How to Use This for Your Resume
-
-### Elevator Pitch (30 seconds)
-
-> "Built an end-to-end data analytics pipeline that processes 25,000 healthcare records to predict migraine risk with 81% AUC. Demonstrated skills in data engineering (cleaning 700+ variables), feature engineering (10+ domain-specific features), machine learning (3 model comparison), and insight communication."
-
-### LinkedIn/GitHub Summary
-
-```
-✓ End-to-end ML pipeline: data → features → models → evaluation
-✓ Managed 143MB healthcare dataset with custom cleaning rules
-✓ Engineered 10+ interpretable features from 700+ raw variables
-✓ Built 3 ML models (LR, DT, RF) with AUC ≈ 0.81
-✓ Generated publication-quality visualizations (ROC, PR, CM)
-✓ Production code: modular, reusable Python architecture
-```
-
-### Interview Talking Points
-
-1. **Data Challenges:** "Handled missing values, invalid codes (7,8,9), and 143MB dataset. Implemented custom imputation strategies per column type."
-2. **Feature Strategy:** "Instead of blindly selecting features, engineered domain-driven variables like Mental Health Score (reversal sum) and Pain Index (frequency × intensity)."
-3. **Model Selection:** "Chose 3 diverse models—LR for interpretability (odds ratios), DT for rules, RF for performance. Random Forest won at AUC 0.81."
-4. **Real-world Impact:** "Results identify modifiable factors (sleep, mental health) for clinician decision support, not just academic metrics."
-
----
 
 ## 📊 Key Results
 
@@ -214,14 +191,6 @@ This project demonstrates how data analytics can generate actionable insights in
 - **Preventive Healthcare:** Identifies modifiable lifestyle factors (sleep, stress) for early intervention
 - **Risk Segmentation:** Enables targeted screening for high-risk populations
 
----
-
-## 💡 Insights & Business Value
-
-This project demonstrates how data analytics can generate actionable insights in healthcare:
-
-- **Preventive Healthcare:** Identifies modifiable lifestyle factors (sleep, stress) for early intervention
-- **Risk Segmentation:** Enables targeted screening for high-risk populations
 - **Decision Support:** Provides interpretable models (odds ratios, decision rules) for stakeholders
 
 ---
@@ -238,22 +207,6 @@ This project demonstrates how data analytics can generate actionable insights in
 
 ---
 
-## 🎓 For Hiring Managers
-
-**Why This Project Matters:**
-
-- Shows ability to work with real, messy healthcare data (not toy datasets)
-- Demonstrates complete data science workflow from problem to production
-- Proves communication skills: translates technical results into business value
-- Indicates thoughtful approach: modular code, multiple models, honest evaluation
-
-**Senior Candidate Signal:**
-
-- Chose 3 different models for good reasons (interpretability vs. performance)
-- Engineered features based on domain knowledge, not just stats
-- Documented everything: code, methodology, business implications
-- Production-ready code with clear separation of concerns
-
 ---
 
 ## 📌 Future Enhancements (Nice-to-Have)
@@ -266,20 +219,8 @@ This project demonstrates how data analytics can generate actionable insights in
 
 ---
 
-## 📋 Summary
+## 📌 Project Outputs
 
-**Perfect for:**
-
-- Data science job applications
-- Internship portfolios
-- Case study interviews
-- Portfolio websites & GitHub
-
-**Demonstrates:**
-
-- Technical depth: ML, data engineering, evaluation
-- Communication: clear README, interactive notebook
-- Business acumen: connects analytics to real decisions
-- Scalability: sample code for Spark shows thinking beyond single machines
-
-Start with this README excerpt in your cover letter or "About Project" section on your portfolio!
+The main artifacts generated by the pipeline are:
+- `outputs/dm_metrics_summary.csv` (model metrics summary, including `threshold_source = val_best_f1`)
+- `outputs/figs/` (ROC/PR curves, confusion matrices, and interpretability plots)

@@ -45,6 +45,37 @@ def split_train_test(
     return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
 
 
+def split_train_val_test(
+    X: pd.DataFrame,
+    y: pd.Series,
+    test_size: float = 0.30,
+    val_size: float = 0.15,
+    random_state: int = 42,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
+    """
+    Split into train/val/test with stratification.
+    val_size is expressed as a fraction of the whole dataset (not of the train split).
+    """
+    if test_size + val_size >= 1:
+        raise ValueError("test_size + val_size must be < 1.")
+
+    X_trainval, X_test, y_trainval, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state, stratify=y
+    )
+
+    remaining = 1.0 - test_size
+    rel_val_size = val_size / remaining
+
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_trainval,
+        y_trainval,
+        test_size=rel_val_size,
+        random_state=random_state,
+        stratify=y_trainval,
+    )
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
 def build_models(random_state: int = 42) -> dict[str, object]:
     return {
         "Logistic Regression": LogisticRegression(
@@ -91,16 +122,18 @@ def run_modeling(
     target_col: str = "AMIGR",
     id_col: str = "RID",
     test_size: float = 0.30,
+    val_size: float = 0.15,
     random_state: int = 42,
 ) -> dict[str, object]:
     input_csv = Path(input_csv)
     df = pd.read_csv(input_csv)
 
     X, y = prepare_xy(df, target_col=target_col, id_col=id_col)
-    X_train, X_test, y_train, y_test = split_train_test(
+    X_train, X_val, X_test, y_train, y_val, y_test = split_train_val_test(
         X,
         y,
         test_size=test_size,
+        val_size=val_size,
         random_state=random_state,
     )
     fitted_models = train_models(X_train=X_train, y_train=y_train)
@@ -109,8 +142,10 @@ def run_modeling(
         "X": X,
         "y": y,
         "X_train": X_train,
+        "X_val": X_val,
         "X_test": X_test,
         "y_train": y_train,
+        "y_val": y_val,
         "y_test": y_test,
         "models": fitted_models,
     }
